@@ -8,8 +8,6 @@ equipement=str(capture[0][CDPv2_HDR].msg[5].cap)
 nom=capture[0][CDPv2_HDR].msg[0].val.decode()
 ip=capture[0][CDPv2_HDR].msg[3].addr[0].addr
 iface=capture[0][CDPv2_HDR].msg[4].iface.decode()
-vlan=capture[0][CDPv2_HDR].msg[8].vlan
-networks= capture[0][CDPv2_HDR].msg[6].prefixes
 print("")
 match equipement:
     case equipement if "Switch" in equipement and "Router" in equipement:
@@ -23,6 +21,15 @@ match equipement:
 print("\n---------------------------------------------------\n")
 print("Adresse IP:      " + ip )
 print("Interface:       " + iface )
-print("Vlan:            " + str(vlan))
-for i in range (0,len(networks)):
-    print("Réseau :         " + networks[i].prefix + "/" + str(networks[i].plen))
+try:
+    vlan=capture[0][CDPv2_HDR].msg[8].vlan
+    print("Vlan:            " + str(vlan))
+except:
+    print("pas de vlans")
+
+try:
+    networks= capture[0][CDPv2_HDR].msg[6].prefixes
+    for i in range (0,len(networks)):
+        print("Réseau :         " + networks[i].prefix + "/" + str(networks[i].plen))
+except:
+    print("pas de préfixes")
